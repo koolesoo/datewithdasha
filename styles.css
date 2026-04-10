@@ -743,6 +743,10 @@ body {
   background: rgba(255, 255, 255, 0.4);
 }
 
+.menu-carousel__zoom-link {
+  display: block;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .restaurant-carousel__track {
     transition: none;
@@ -867,6 +871,10 @@ button,
 }
 
 @media (orientation: portrait) {
+  .menu-carousel__zoom-link {
+    cursor: zoom-in;
+  }
+
   .title-break-mobile {
     display: block;
   }
