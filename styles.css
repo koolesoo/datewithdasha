@@ -33,26 +33,6 @@
   max-width: 16ch;
 }
 
-@media (hover: none) and (pointer: coarse) and (max-width: 900px) {
-  html {
-    overflow: hidden;
-    height: 100%;
-  }
-
-  body {
-    overflow: hidden;
-    min-height: 100dvh;
-  }
-
-  .portrait-only-notice {
-    display: flex;
-  }
-
-  .sticky-clock {
-    display: none;
-  }
-}
-
 .sticky-clock {
   position: fixed;
   right: clamp(0.65rem, 2.2vw, 1.15rem);
@@ -351,8 +331,8 @@ body {
   opacity: 1;
 }
 
-/* Узкий экран: видео в потоке сверху — центральный блок не смещается */
-@media (max-width: 960px) {
+/* Портретный экран: видео в потоке сверху — центральный блок не смещается */
+@media (orientation: portrait) {
   .invite__matryoshka {
     position: relative;
     right: auto;
@@ -414,6 +394,10 @@ body {
 
 #restaurant .screen__title--restaurant-line {
   white-space: nowrap;
+}
+
+.title-break-mobile {
+  display: none;
 }
 
 .screen__head--invite {
@@ -880,6 +864,101 @@ button,
 
 #btn-no:hover {
   background: rgba(255, 255, 255, 0.32);
+}
+
+@media (orientation: portrait) {
+  .title-break-mobile {
+    display: block;
+  }
+
+  #restaurant .screen__title--restaurant-line {
+    white-space: normal;
+  }
+
+  html {
+    font-size: clamp(15px, 4.1vw, 18px);
+  }
+
+  .flow-section {
+    padding:
+      clamp(1.4rem, 6.5dvh, 2.35rem)
+      clamp(0.95rem, 4.8vw, 1.35rem)
+      clamp(1.6rem, 5dvh, 2.2rem);
+  }
+
+  .screen__inner {
+    padding: clamp(0.85rem, 4.4vw, 1.2rem);
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .screen__head,
+  .screen__body,
+  .screen__actions {
+    text-align: left;
+  }
+
+  .screen__actions {
+    align-items: center;
+  }
+
+  .screen__head--stage {
+    justify-content: flex-start;
+  }
+
+  .screen__title,
+  .invite__text {
+    font-size: clamp(1.75rem, 7.4vw, 2.35rem);
+    line-height: 1.15;
+  }
+
+  .screen__head--invite {
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+
+  .invite__matryoshka {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  #premeet-taxi .screen__head,
+  #restaurant .screen__head,
+  #film .screen__head,
+  #taxi .screen__head {
+    padding-right: clamp(3.2rem, 14vw, 4.8rem);
+  }
+
+  .screen__head--stage {
+    flex-wrap: wrap;
+    row-gap: 0.45rem;
+  }
+
+  .btn {
+    min-height: 2.85rem;
+    padding: 0.8rem 1.3rem;
+    font-size: clamp(0.98rem, 4.2vw, 1.08rem);
+  }
+
+  .btn--primary {
+    width: min(100%, 19.5rem);
+  }
+
+  .invite__actions {
+    min-height: auto;
+    gap: 0.9rem;
+  }
+
+  .runaway-wrap,
+  .flow-section--invite .runaway-wrap {
+    display: none;
+  }
+
+  .restaurant-carousel__btn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.2rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

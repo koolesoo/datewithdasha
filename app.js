@@ -8,6 +8,8 @@
   const btnHome = document.getElementById("btn-home");
 
   const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const mqCoarsePointer = window.matchMedia("(hover: none) and (pointer: coarse)");
+  const mqPortrait = window.matchMedia("(orientation: portrait)");
 
   const TEXT_BTN_YES = "Приду";
   const TEXT_BTN_YES_PLAYING = "Что меня ждёт?";
@@ -180,9 +182,28 @@
   function scrollToId(id, fast) {
     const el = document.getElementById(id);
     if (!el) return;
+    if (id === "premeet-taxi") {
+      const y = el.getBoundingClientRect().top + window.scrollY;
+      smoothScrollToY(Math.max(0, y - 8), { fast: Boolean(fast) });
+      return;
+    }
+    const stageAnchor = el.querySelector("[data-stage-time]");
+    const stageRect = stageAnchor?.getBoundingClientRect();
+    if (stageRect) {
+      // Align chosen stage marker with the same scan line used by sticky-clock logic.
+      const fallbackScanOffset = window.innerHeight * 0.5;
+      const clockRect = stickyClockEl?.getBoundingClientRect();
+      const scanOffset =
+        clockRect && clockRect.height > 0 && !stickyClockEl?.classList.contains("sticky-clock--hidden")
+          ? clockRect.top + clockRect.height / 2
+          : fallbackScanOffset;
+      const stageCenterDocY = stageRect.top + stageRect.height / 2 + window.scrollY;
+      const targetY = stageCenterDocY - scanOffset;
+      smoothScrollToY(targetY, { fast: Boolean(fast) });
+      return;
+    }
     const y = el.getBoundingClientRect().top + window.scrollY;
-    const pad = 8;
-    smoothScrollToY(y - pad, { fast: Boolean(fast) });
+    smoothScrollToY(y, { fast: Boolean(fast) });
   }
 
   btnYes.addEventListener("click", () => {
@@ -264,7 +285,7 @@
   }
 
   function placeButtonFarthestFrom(clientX, clientY) {
-    if (isRunawayHidden() || !runawayWrap) return;
+    if (isRunawayHidden() || !runawayWrap || mqCoarsePointer.matches) return;
     const btn = btnNo;
     const wrap = runawayWrap;
     const wr = wrap.getBoundingClientRect();
@@ -327,7 +348,7 @@
   }
 
   function maybeFlee(clientX, clientY) {
-    if (isRunawayHidden() || !runawayWrap || !btnNo) return;
+    if (isRunawayHidden() || !runawayWrap || !btnNo || mqCoarsePointer.matches) return;
     const wr = runawayWrap.getBoundingClientRect();
     if (
       clientX < wr.left ||
@@ -346,6 +367,18 @@
 
   function expandWrapIfNeeded() {
     if (isRunawayHidden() || !runawayWrap) return;
+    if (mqCoarsePointer.matches) {
+      runawayWrap.style.width = "100%";
+      runawayWrap.style.maxWidth = "100%";
+      runawayWrap.style.boxSizing = "border-box";
+      runawayWrap.style.height = "";
+      if (btnNo) {
+        btnNo.style.left = "";
+        btnNo.style.top = "";
+        btnNo.style.transform = "";
+      }
+      return;
+    }
     const vh = window.innerHeight;
     runawayWrap.style.width = "100%";
     runawayWrap.style.maxWidth = "100%";
@@ -504,8 +537,11 @@
       if (!viewport || !track || n < 1) return;
       const w = viewport.clientWidth;
       if (w < 1) return;
-      const slideW = Math.max(1, Math.floor(w * slideRatio));
-      track.style.gap = `${CAROUSEL_GAP_PX}px`;
+      const isCompact = mqCoarsePointer.matches || mqPortrait.matches;
+      const effectiveRatio = isCompact ? 1 : slideRatio;
+      const effectiveGap = isCompact ? 0 : CAROUSEL_GAP_PX;
+      const slideW = Math.max(1, Math.floor(w * effectiveRatio));
+      track.style.gap = `${effectiveGap}px`;
       slides.forEach((slide) => {
         slide.style.flex = `0 0 ${slideW}px`;
         slide.style.width = `${slideW}px`;
@@ -517,7 +553,9 @@
       if (!track || n < 1) return;
       carouselIndex = ((i % n) + n) % n;
       const slideW = slides[0]?.offsetWidth ?? 0;
-      const offset = carouselIndex * (slideW + CAROUSEL_GAP_PX);
+      const isCompact = mqCoarsePointer.matches || mqPortrait.matches;
+      const effectiveGap = isCompact ? 0 : CAROUSEL_GAP_PX;
+      const offset = carouselIndex * (slideW + effectiveGap);
       track.style.transform = `translateX(-${offset}px)`;
       slides.forEach((slide, j) => {
         slide.setAttribute("aria-hidden", j === carouselIndex ? "false" : "true");
