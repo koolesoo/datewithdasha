@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Свидание</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="./heart-favicon.png?v=3" />
+    <link rel="icon" type="image/svg+xml" href="./heart-favicon.svg?v=3" />
+    <link rel="shortcut icon" href="./favicon.ico?v=3" />
+    <link rel="apple-touch-icon" href="./heart-favicon.png?v=3" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -40,12 +44,11 @@
               ></video>
             </div>
             <div class="invite__main">
-              <div class="screen__head screen__head--stage screen__head--invite">
+              <div class="screen__head screen__head--stage screen__head--invite" data-stage-time="18:40">
                 <p class="invite__text">
                   <span class="invite__text-name">Дашуля,</span>
-                  <span class="invite__text-rest">приглашаю тебя на свидание</span>
+                  <span class="invite__text-rest">приглашаю тебя на наш вечер</span>
                 </p>
-                <time class="stage__time invite__when" datetime="19:00">сегодня, 10 апреля в 19:00</time>
               </div>
               <div class="invite__actions screen__actions">
                 <button type="button" class="btn btn--primary" id="btn-yes">Приду</button>
@@ -58,30 +61,43 @@
         </div>
       </section>
 
+      <section class="flow-section" id="premeet-taxi">
+        <div class="screen__inner">
+          <div class="screen__head screen__head--stage" data-stage-time="18:40">
+            <h1 class="screen__title">Такси до места встречи</h1>
+          </div>
+          <div class="screen__body">
+            <p class="taxi__note">Вызову его к 18:40</p>
+          </div>
+          <div class="screen__actions">
+            <button type="button" class="btn btn--primary" id="btn-premeet-next">Что дальше?</button>
+          </div>
+        </div>
+      </section>
+
       <section class="flow-section" id="restaurant">
         <div class="screen__inner">
-          <div class="screen__head screen__head--stage">
+          <div class="screen__head screen__head--stage" data-stage-time="19:00">
             <h1 class="screen__title screen__title--restaurant-line">Ресторан&nbsp;FROM</h1>
-            <time class="stage__time" datetime="19:00">19:00</time>
           </div>
           <div class="screen__body">
             <div
-              class="restaurant-carousel"
-              id="restaurant-carousel"
+              class="restaurant-carousel menu-carousel"
+              id="menu-carousel"
               role="region"
               aria-roledescription="карусель"
-              aria-label="Фото ресторана"
+              aria-label="Меню ресторана"
             >
               <div class="restaurant-carousel__viewport">
-                <div class="restaurant-carousel__track" id="restaurant-carousel-track">
+                <div class="restaurant-carousel__track" id="menu-carousel-track">
                   <div class="restaurant-carousel__slide" data-carousel-slide aria-hidden="false">
                     <div class="gallery__frame restaurant-carousel__frame">
                       <img
-                        class="gallery__img"
-                        src="images/restaurant-hall.png"
-                        alt="Интерьер ресторана"
-                        width="1600"
-                        height="800"
+                        class="gallery__img menu-carousel__img"
+                        src="images/menu-rus/menu-rus-01.webp"
+                        alt="Меню ресторана, страница 1"
+                        width="2479"
+                        height="3508"
                         loading="lazy"
                         decoding="async"
                       />
@@ -90,11 +106,24 @@
                   <div class="restaurant-carousel__slide" data-carousel-slide aria-hidden="true">
                     <div class="gallery__frame restaurant-carousel__frame">
                       <img
-                        class="gallery__img"
-                        src="images/restaurant-dish.png"
-                        alt="Блюдо"
-                        width="1200"
-                        height="800"
+                        class="gallery__img menu-carousel__img"
+                        src="images/menu-rus/menu-rus-02.webp"
+                        alt="Меню ресторана, страница 2"
+                        width="2479"
+                        height="3508"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                  </div>
+                  <div class="restaurant-carousel__slide" data-carousel-slide aria-hidden="true">
+                    <div class="gallery__frame restaurant-carousel__frame">
+                      <img
+                        class="gallery__img menu-carousel__img"
+                        src="images/menu-rus/menu-rus-03.webp"
+                        alt="Меню ресторана, страница 3"
+                        width="2479"
+                        height="3508"
                         loading="lazy"
                         decoding="async"
                       />
@@ -106,59 +135,66 @@
                 <button
                   type="button"
                   class="restaurant-carousel__btn restaurant-carousel__btn--prev"
-                  aria-label="Предыдущее фото"
+                  aria-label="Предыдущая страница меню"
                 >
                   ‹
                 </button>
-                <div class="restaurant-carousel__dots" role="tablist" aria-label="Слайды">
+                <div class="restaurant-carousel__dots" role="tablist" aria-label="Страницы меню">
                   <button
                     type="button"
                     class="restaurant-carousel__dot"
                     role="tab"
                     aria-selected="true"
-                    aria-label="Слайд 1 из 2"
+                    aria-label="Страница меню 1 из 3"
                   ></button>
                   <button
                     type="button"
                     class="restaurant-carousel__dot"
                     role="tab"
                     aria-selected="false"
-                    aria-label="Слайд 2 из 2"
+                    aria-label="Страница меню 2 из 3"
+                  ></button>
+                  <button
+                    type="button"
+                    class="restaurant-carousel__dot"
+                    role="tab"
+                    aria-selected="false"
+                    aria-label="Страница меню 3 из 3"
                   ></button>
                 </div>
                 <button
                   type="button"
                   class="restaurant-carousel__btn restaurant-carousel__btn--next"
-                  aria-label="Следующее фото"
+                  aria-label="Следующая страница меню"
                 >
                   ›
                 </button>
               </div>
             </div>
             <div class="discuss">
-              <p class="discuss__heading">Что хочу обсудить</p>
+              <p class="discuss__heading">О чём поговорим</p>
               <details class="discuss__item">
                 <summary class="discuss__summary">Поездка</summary>
                 <div class="discuss__panel">
-                  <p class="discuss__desc">Планы, маршрут и всё, что хочется рассказать про дорогу — текст можно заменить на свой.</p>
+                  <p class="discuss__desc">Даты, билеты и кое-что ещё :)</p>
                 </div>
               </details>
               <details class="discuss__item">
                 <summary class="discuss__summary">День</summary>
                 <div class="discuss__panel">
-                  <p class="discuss__desc">Как прошёл день, мелочи и настроение — наполни смыслом при желании.</p>
+                  <p class="discuss__desc">Что было, всякие мелочи и настроение</p>
                 </div>
               </details>
               <details class="discuss__item">
                 <summary class="discuss__summary">Насущные темы</summary>
                 <div class="discuss__panel">
-                  <p class="discuss__desc">То, о чём важно поговорить без откладывания — правь текст под себя.</p>
+                  <p class="discuss__desc">То, о чём важно поговорить и давно хотели</p>
                 </div>
               </details>
               <details class="discuss__item">
                 <summary class="discuss__summary">Что-нибудь ещё по ситуации</summary>
                 <div class="discuss__panel">
-                  <p class="discuss__desc">Всё остальное, что вспомнится за столом — заглушка для твоих слов.</p>
+                  <p class="discuss__desc">Всё остальное, что вспомнится</p>
                 </div>
               </details>
             </div>
@@ -171,9 +207,21 @@
 
       <section class="flow-section" id="film">
         <div class="screen__inner">
-          <div class="screen__head screen__head--stage">
+          <div class="screen__head screen__head--stage" data-stage-time="20:00">
             <h1 class="screen__title">Фильм «Драма»</h1>
-            <time class="stage__time" datetime="20:00">20:00</time>
+          </div>
+          <div class="screen__body film__body">
+            <figure class="gallery__frame film__poster">
+              <img
+                class="film__poster-img"
+                src="images/film-drama-poster.png"
+                alt="Постер фильма Драма"
+                width="480"
+                height="630"
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
           </div>
           <div class="screen__actions">
             <button type="button" class="btn btn--primary" id="btn-film-next">Что дальше?</button>
@@ -183,19 +231,18 @@
 
       <section class="flow-section flow-section--last" id="taxi">
         <div class="screen__inner">
-          <div class="screen__head screen__head--stage">
+          <div class="screen__head screen__head--stage" data-stage-time="22:00">
             <h1 class="screen__title">Домой</h1>
-            <time class="stage__time" datetime="22:00">22:00</time>
           </div>
           <div class="screen__body">
             <p class="taxi__note">
-              Если захочется — можно и не на такси. Главное — чтобы тебе было удобно.
+              Конечно, на такси
+              <br>Ну или отсрочим, если захочется ещё что-нибудь ✦
             </p>
           </div>
           <div class="screen__actions">
             <button type="button" class="btn btn--ghost" id="btn-home">В начало</button>
           </div>
-          <p class="screen__foot taxi__footer">Ну или что-то другое, если захочется ✦</p>
         </div>
       </section>
     </main>
@@ -206,9 +253,9 @@
       aria-live="polite"
       aria-hidden="true"
     >
-      <time class="sticky-clock__time" id="sticky-clock-time" datetime="19:00" aria-label="19:00">
+      <span class="sticky-clock__time" id="sticky-clock-time" data-time="19:00" aria-label="19:00">
         <span class="sticky-clock__hh" aria-hidden="true">19</span><span class="sticky-clock__sep" aria-hidden="true">:</span><span class="sticky-clock__mm" aria-hidden="true">00</span>
-      </time>
+      </span>
     </aside>
     <script src="app.js" defer></script>
   </body>

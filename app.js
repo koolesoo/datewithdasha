@@ -2,6 +2,7 @@
   const btnYes = document.getElementById("btn-yes");
   const btnNo = document.getElementById("btn-no");
   const runawayWrap = document.getElementById("runaway-wrap");
+  const btnPremeetNext = document.getElementById("btn-premeet-next");
   const btnNext = document.getElementById("btn-next");
   const btnFilmNext = document.getElementById("btn-film-next");
   const btnHome = document.getElementById("btn-home");
@@ -9,14 +10,24 @@
   const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const TEXT_BTN_YES = "Приду";
-  const TEXT_BTN_YES_PLAYING = "Что тебя ждет";
+  const TEXT_BTN_YES_PLAYING = "Что меня ждёт?";
 
   const inviteSection = document.getElementById("invite");
   const matryoshka = document.getElementById("invite-matryoshka");
+  const inviteHeading = inviteSection?.querySelector(".screen__head--invite");
+  const inviteBlock = inviteSection?.querySelector(".invite__block");
   const videoYes = matryoshka?.querySelector(".invite__matryoshka-video--yes");
   const videoCry = matryoshka?.querySelector(".invite__matryoshka-video--cry");
 
   let yesPlayingFromClick = false;
+  let yesStoppedAtEnd = false;
+
+  function seekYesToLastFrame() {
+    if (!videoYes) return;
+    if (Number.isFinite(videoYes.duration) && videoYes.duration > 0.05) {
+      videoYes.currentTime = videoYes.duration - 0.05;
+    }
+  }
 
   function setRunawayHidden(hidden) {
     const on = Boolean(hidden);
@@ -39,6 +50,22 @@
     return document.documentElement.classList.contains("invite-scroll-locked");
   }
 
+  function syncInviteLockOnRestore() {
+    const navEntry = performance.getEntriesByType("navigation")[0];
+    const navType = navEntry?.type;
+    if (navType === "reload") {
+      setInviteScrollLocked(true);
+      window.scrollTo(0, 0);
+      return;
+    }
+    if (!isInviteScrollLocked()) return;
+    const inviteBottomInViewport = inviteSection?.getBoundingClientRect().bottom ?? window.innerHeight;
+    const restoredAwayFromTop = window.scrollY > 12 || inviteBottomInViewport <= window.innerHeight * 0.55;
+    if (restoredAwayFromTop) {
+      setInviteScrollLocked(false);
+    }
+  }
+
   function onWheelInviteLock(e) {
     if (!isInviteScrollLocked() || e.ctrlKey || e.metaKey) return;
     if (e.deltaY > 0) e.preventDefault();
@@ -55,19 +82,45 @@
     }
   }
 
+  function alignMatryoshkaToInviteHeading() {
+    if (!matryoshka || !inviteHeading || !inviteBlock) return;
+    if (window.getComputedStyle(matryoshka).position !== "absolute") return;
+    const headingRect = inviteHeading.getBoundingClientRect();
+    const blockRect = inviteBlock.getBoundingClientRect();
+    const centerY = headingRect.top + headingRect.height / 2 - blockRect.top;
+    matryoshka.style.top = `${Math.round(centerY)}px`;
+  }
+
   window.addEventListener("wheel", onWheelInviteLock, { passive: false });
   window.addEventListener("keydown", onKeyDownInviteLock);
+  window.addEventListener("pageshow", syncInviteLockOnRestore);
+  window.addEventListener("load", syncInviteLockOnRestore);
+  requestAnimationFrame(syncInviteLockOnRestore);
+  setTimeout(syncInviteLockOnRestore, 120);
+  setTimeout(syncInviteLockOnRestore, 420);
+  setTimeout(syncInviteLockOnRestore, 900);
+  window.addEventListener("resize", alignMatryoshkaToInviteHeading);
+  requestAnimationFrame(() => {
+    alignMatryoshkaToInviteHeading();
+    requestAnimationFrame(alignMatryoshkaToInviteHeading);
+  });
 
   function setMatryoshkaState(state) {
     if (!matryoshka || !videoYes || !videoCry) return;
     matryoshka.dataset.state = state;
     if (state === "cry") {
+      yesPlayingFromClick = false;
       videoYes.pause();
       videoCry.play().catch(() => {});
     } else {
       videoCry.pause();
       if (yesPlayingFromClick) {
-        videoYes.play().catch(() => {});
+        return;
+      } else if (yesStoppedAtEnd) {
+        try {
+          videoYes.pause();
+          seekYesToLastFrame();
+        } catch (_) {}
       } else {
         videoYes.pause();
         videoYes.currentTime = 0;
@@ -77,13 +130,14 @@
 
   if (matryoshka && videoYes && videoCry && btnYes && btnNo) {
     function freezeYesFirstFrame() {
-      if (yesPlayingFromClick) return;
+      if (yesPlayingFromClick || yesStoppedAtEnd) return;
       try {
         videoYes.pause();
         videoYes.currentTime = 0;
       } catch (_) {}
     }
 
+    videoYes.addEventListener("loadedmetadata", freezeYesFirstFrame, { once: true });
     videoYes.addEventListener("loadeddata", freezeYesFirstFrame, { once: true });
     freezeYesFirstFrame();
 
@@ -133,7 +187,7 @@
 
   btnYes.addEventListener("click", () => {
     if (btnYes.textContent.trim() === TEXT_BTN_YES_PLAYING) {
-      scrollToId("restaurant");
+      scrollToId("premeet-taxi");
       return;
     }
 
@@ -146,22 +200,24 @@
       return;
     }
 
-    if (!videoYes || videoYes.readyState < 2) {
+    if (!videoYes || videoYes.readyState < 1) {
       return;
     }
 
     btnYes.textContent = TEXT_BTN_YES_PLAYING;
     btnYes.setAttribute("aria-label", TEXT_BTN_YES_PLAYING);
     yesPlayingFromClick = true;
+    yesStoppedAtEnd = false;
     if (matryoshka) matryoshka.dataset.state = "idle";
     videoCry?.pause();
     videoYes.currentTime = 0;
     const onEnd = () => {
       yesPlayingFromClick = false;
+      yesStoppedAtEnd = true;
       videoYes.removeEventListener("ended", onEnd);
       try {
         videoYes.pause();
-        videoYes.currentTime = 0;
+        seekYesToLastFrame();
       } catch (_) {}
     };
     videoYes.addEventListener("ended", onEnd, { once: true });
@@ -171,13 +227,20 @@
       btnYes.setAttribute("aria-label", TEXT_BTN_YES);
     });
   });
+  btnPremeetNext?.addEventListener("click", () => scrollToId("restaurant"));
   btnNext.addEventListener("click", () => scrollToId("film"));
   btnFilmNext.addEventListener("click", () => scrollToId("taxi"));
   btnHome.addEventListener("click", () => {
+    yesPlayingFromClick = false;
+    try {
+      videoYes?.pause();
+      videoYes.currentTime = 0;
+    } catch (_) {}
     if (btnYes) {
       btnYes.textContent = TEXT_BTN_YES;
       btnYes.setAttribute("aria-label", TEXT_BTN_YES);
     }
+    yesStoppedAtEnd = false;
     setRunawayHidden(false);
     expandWrapIfNeeded();
     setInviteScrollLocked(false);
@@ -315,8 +378,8 @@
   const stickyHhEl = stickyTimeEl?.querySelector(".sticky-clock__hh");
   const stickyMmEl = stickyTimeEl?.querySelector(".sticky-clock__mm");
 
-  function parseStageTimeToMinutes(timeEl) {
-    const dt = timeEl.getAttribute("datetime");
+  function parseStageTimeToMinutes(stageAnchorEl) {
+    const dt = stageAnchorEl.getAttribute("data-stage-time");
     if (!dt) return 0;
     const parts = dt.split(":");
     const h = Number(parts[0]);
@@ -324,20 +387,24 @@
     return h * 60 + m;
   }
 
-  function stageTimeCenterDocY(timeEl) {
-    const r = timeEl.getBoundingClientRect();
+  function stageTimeCenterDocY(stageAnchorEl) {
+    const r = stageAnchorEl.getBoundingClientRect();
     return r.top + r.height / 2 + window.scrollY;
   }
 
   function updateStickyClock() {
     if (!stickyTimeEl) return;
-    const stageTimes = document.querySelectorAll("main .stage__time");
-    if (!stageTimes.length) return;
+    const stageTimeAnchors = document.querySelectorAll("main [data-stage-time]");
+    if (!stageTimeAnchors.length) return;
 
-    const vh = window.innerHeight;
-    const scanY = window.scrollY + vh * 0.5;
+    const fallbackScanY = window.scrollY + window.innerHeight * 0.5;
+    const clockRect = stickyClockEl?.getBoundingClientRect();
+    const scanY =
+      clockRect && clockRect.height > 0
+        ? window.scrollY + clockRect.top + clockRect.height / 2
+        : fallbackScanY;
 
-    const milestones = Array.from(stageTimes).map((el) => ({
+    const milestones = Array.from(stageTimeAnchors).map((el) => ({
       y: stageTimeCenterDocY(el),
       min: parseStageTimeToMinutes(el),
     }));
@@ -351,7 +418,7 @@
         break;
       }
     }
-    const showStickyClock = scanY >= interpolationThresholdY;
+    const showStickyClock = fallbackScanY >= interpolationThresholdY;
     if (stickyClockEl) {
       stickyClockEl.classList.toggle("sticky-clock--hidden", !showStickyClock);
       stickyClockEl.setAttribute("aria-hidden", showStickyClock ? "false" : "true");
@@ -404,7 +471,7 @@
     if (stickyHhEl) stickyHhEl.textContent = hhStr;
     if (stickyMmEl) stickyMmEl.textContent = mmStr;
 
-    stickyTimeEl.setAttribute("datetime", text);
+    stickyTimeEl.setAttribute("data-time", text);
     stickyTimeEl.setAttribute("aria-label", text);
   }
 
@@ -422,34 +489,34 @@
   window.addEventListener("resize", onScrollOrResizeForClock);
   updateStickyClock();
 
-  const restaurantCarousel = document.getElementById("restaurant-carousel");
-  if (restaurantCarousel) {
-    const viewport = restaurantCarousel.querySelector(".restaurant-carousel__viewport");
-    const track = document.getElementById("restaurant-carousel-track");
-    const slides = restaurantCarousel.querySelectorAll("[data-carousel-slide]");
-    const btnPrev = restaurantCarousel.querySelector(".restaurant-carousel__btn--prev");
-    const btnNext = restaurantCarousel.querySelector(".restaurant-carousel__btn--next");
-    const dots = restaurantCarousel.querySelectorAll(".restaurant-carousel__dot");
+  function initInlineCarousel(rootId, trackId, slideRatio = 0.85) {
+    const root = document.getElementById(rootId);
+    if (!root) return;
+    const viewport = root.querySelector(".restaurant-carousel__viewport");
+    const track = document.getElementById(trackId);
+    const slides = root.querySelectorAll("[data-carousel-slide]");
+    const btnPrev = root.querySelector(".restaurant-carousel__btn--prev");
+    const btnNext = root.querySelector(".restaurant-carousel__btn--next");
+    const dots = root.querySelectorAll(".restaurant-carousel__dot");
     const n = slides.length;
     let carouselIndex = 0;
 
     const CAROUSEL_GAP_PX = 12;
-    const CAROUSEL_SLIDE_RATIO = 0.85;
 
-    function restaurantCarouselLayout() {
+    function layout() {
       if (!viewport || !track || n < 1) return;
       const w = viewport.clientWidth;
       if (w < 1) return;
-      const slideW = Math.max(1, Math.floor(w * CAROUSEL_SLIDE_RATIO));
+      const slideW = Math.max(1, Math.floor(w * slideRatio));
       track.style.gap = `${CAROUSEL_GAP_PX}px`;
       slides.forEach((slide) => {
         slide.style.flex = `0 0 ${slideW}px`;
         slide.style.width = `${slideW}px`;
       });
-      restaurantCarouselGoTo(carouselIndex);
+      goTo(carouselIndex);
     }
 
-    function restaurantCarouselGoTo(i) {
+    function goTo(i) {
       if (!track || n < 1) return;
       carouselIndex = ((i % n) + n) % n;
       const slideW = slides[0]?.offsetWidth ?? 0;
@@ -463,16 +530,18 @@
       });
     }
 
-    btnPrev?.addEventListener("click", () => restaurantCarouselGoTo(carouselIndex - 1));
-    btnNext?.addEventListener("click", () => restaurantCarouselGoTo(carouselIndex + 1));
+    btnPrev?.addEventListener("click", () => goTo(carouselIndex - 1));
+    btnNext?.addEventListener("click", () => goTo(carouselIndex + 1));
     dots.forEach((dot, j) => {
-      dot.addEventListener("click", () => restaurantCarouselGoTo(j));
+      dot.addEventListener("click", () => goTo(j));
     });
 
-    window.addEventListener("resize", restaurantCarouselLayout);
+    window.addEventListener("resize", layout);
     requestAnimationFrame(() => {
-      restaurantCarouselLayout();
-      requestAnimationFrame(restaurantCarouselLayout);
+      layout();
+      requestAnimationFrame(layout);
     });
   }
+
+  initInlineCarousel("menu-carousel", "menu-carousel-track", 0.88);
 })();
