@@ -967,6 +967,10 @@ button,
     height: 2rem;
     font-size: 1.2rem;
   }
+
+  .flow-section--last {
+    padding-bottom: clamp(30rem, 110dvh, 52rem);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
