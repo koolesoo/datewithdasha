@@ -200,12 +200,9 @@
       return;
     }
 
-    if (!videoYes || videoYes.readyState < 1) {
-      return;
-    }
-
     btnYes.textContent = TEXT_BTN_YES_PLAYING;
     btnYes.setAttribute("aria-label", TEXT_BTN_YES_PLAYING);
+    if (!videoYes) return;
     yesPlayingFromClick = true;
     yesStoppedAtEnd = false;
     if (matryoshka) matryoshka.dataset.state = "idle";

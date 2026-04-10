@@ -833,6 +833,14 @@ body {
   box-shadow: none;
 }
 
+button,
+[role="button"],
+.discuss__summary,
+.restaurant-carousel__btn,
+.restaurant-carousel__dot {
+  cursor: pointer !important;
+}
+
 .btn:hover:not(.btn--primary):not(.btn--ghost) {
   background: rgba(255, 255, 255, 0.5);
 }
