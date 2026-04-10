@@ -505,6 +505,31 @@
     stickyTimeEl.setAttribute("aria-label", text);
   }
 
+  function ensureLastStageReachable() {
+    if (!mqPortrait.matches) return;
+    const lastSection = document.getElementById("taxi");
+    const lastStageAnchor = lastSection?.querySelector("[data-stage-time]");
+    if (!lastSection || !lastStageAnchor) return;
+
+    // Reset to CSS value first, then calculate only the required extra tail.
+    lastSection.style.paddingBottom = "";
+
+    const stageRect = lastStageAnchor.getBoundingClientRect();
+    const stageCenterDocY = stageRect.top + stageRect.height / 2 + window.scrollY;
+    const clockRect = stickyClockEl?.getBoundingClientRect();
+    const scanOffset =
+      clockRect && clockRect.height > 0 ? clockRect.top + clockRect.height / 2 : window.innerHeight * 0.5;
+
+    const maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const requiredScrollY = stageCenterDocY - scanOffset;
+    const deficit = requiredScrollY - maxScrollY;
+    if (deficit <= 0) return;
+
+    const currentPad = parseFloat(window.getComputedStyle(lastSection).paddingBottom) || 0;
+    const extra = Math.ceil(deficit + 24);
+    lastSection.style.paddingBottom = `${Math.max(0, currentPad + extra)}px`;
+  }
+
   let stickyClockTicking = false;
   function onScrollOrResizeForClock() {
     if (stickyClockTicking) return;
@@ -517,7 +542,13 @@
 
   window.addEventListener("scroll", onScrollOrResizeForClock, { passive: true });
   window.addEventListener("resize", onScrollOrResizeForClock);
+  window.addEventListener("resize", ensureLastStageReachable);
+  window.addEventListener("orientationchange", ensureLastStageReachable);
   updateStickyClock();
+  ensureLastStageReachable();
+  requestAnimationFrame(ensureLastStageReachable);
+  setTimeout(ensureLastStageReachable, 160);
+  setTimeout(ensureLastStageReachable, 520);
 
   function initInlineCarousel(rootId, trackId, slideRatio = 0.85) {
     const root = document.getElementById(rootId);
